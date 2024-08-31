@@ -1,0 +1,51 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: This template creates an EC2 instance
+
+Parameters:
+  KmsKeyArn:
+    Type: String
+    Description: ARN of the KMS Key 
+  
+  ImageID:
+    Type: String
+    Description: Arn of the Ec2 Instance
+
+  BucketName:
+    Type: String
+    Description: Name of the Bucket
+
+Resources:
+  EC2Instance:
+    Type: AWS::EC2::Instance
+    Properties:
+       InstanceType: "t2.micro"
+       ImageId:  "ami-066784287e358dad1"
+       SecurityGroupIds:
+         - !Ref MySecurityGroup
+      # Tags: 
+        # - Key: "IaC"
+         #  value: "CloudFormation"
+
+  MySecurityGroup:
+    Type: AWS::EC2::SecurityGroup 
+    Properties:
+       GroupDescription: 'Allow HTTP Ingress'
+       SecurityGroupIngress: 
+         - IpProtocol : 'tcp'
+           FromPort : 80
+           ToPort : 80
+           CidrIp : '0.0.0.0/0'
+
+
+  S3Bucket:
+    Type: AWS::S3::Bucket
+    Properties:
+       BucketEncryption:
+         ServerSideEncryptionConfiguration:
+           - ServerSideEncryptionByDefault:
+               SSEAlgorithm: "aws:kms"
+               KMSMasterKeyID: !Ref KmsKeyArn
+       BucketName: !Ref BucketName    
+       VersioningConfiguration: 
+          Status: "Enabled"         
+             
